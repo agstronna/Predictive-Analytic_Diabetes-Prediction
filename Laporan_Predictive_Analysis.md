@@ -43,27 +43,27 @@ Berdasarkan penelitian tersebut, penerapan machine learning dalam prediksi diabe
 ### Visualisasi Distribusi Data Numerik
 Visualisasi distribusi menunjukkan bahwa **age** memiliki sebaran yang relatif normal dengan sedikit skew di ujung kanan. **bmi** memiliki distribusi yang sangat tidak merata dengan puncak yang tajam di sekitar nol. **blood_glucose_level** memperlihatkan pola multimodal dengan beberapa puncak, sementara **HbA1c_level** menunjukkan pola serupa dengan banyak puncak dan distribusi yang tidak merata.
 
-![image](https://github.com/user-attachments/assets/d9a0357e-a366-4891-8fbd-246555bf9334)
+![DistribusiNumerik](https://github.com/user-attachments/assets/3d444c84-1f8f-4fac-b0b0-ffc1d37cfbf9)
 
 ### Visualisasi Distribusi Data Kategori
 Visualisasi distribusi data kategori menunjukkan bahwa jumlah individu **perempuan** lebih banyak dibandingkan laki-laki. Mayoritas sampel **tidak memiliki hipertensi, penyakit jantung, maupun diabetes**, sementara hanya sebagian kecil yang terdiagnosis. Pada riwayat merokok, kategori "No Info" dan "Never" mendominasi, sedangkan kategori "Former", "Current", "Not Current", dan "Ever" memiliki jumlah yang jauh lebih sedikit.
 
-![image](https://github.com/user-attachments/assets/a9724995-8ef9-4f3a-b404-479ed5b97045)
+![DistribusiKategori](https://github.com/user-attachments/assets/8872705e-99d6-4875-b7fa-e6a2624411df)
 
 ### Visualisasi Rata Rata Diabetes vs Fitur
 Visualisasi menunjukkan bahwa rata-rata penderita diabetes lebih tinggi pada laki-laki dibanding perempuan. Individu dengan hipertensi dan penyakit jantung memiliki kemungkinan lebih besar menderita diabetes. Riwayat merokok juga berpengaruh, dengan mantan perokok (former smokers) memiliki rata-rata penderita diabetes tertinggi, sedangkan kategori "No Info" memiliki yang terendah.
 
-![image](https://github.com/user-attachments/assets/b607a007-ea74-4b22-8e7b-87fbeaed861c)
+![MeanDiabetesVSOtherFeatures](https://github.com/user-attachments/assets/bb9ce3b8-ebd9-447a-80a0-9e140a7816ec)
 
 ### Visualisasi KDE
 Visualisasi menunjukkan hubungan antara berbagai fitur dalam dataset, seperti **age, hypertension, heart_disease, bmi, HbA1c_level, blood_glucose_level**, dan **diabetes**. Scatter plot memperlihatkan distribusi titik data di antara pasangan variabel, sementara plot KDE di diagonal menunjukkan distribusi probabilitas masing-masing variabel. Beberapa fitur seperti **HbA1c_level** dan **blood_glucose_level** memperlihatkan variasi distribusi yang jelas, sedangkan variabel biner seperti **hypertension** dan **heart_disease** menunjukkan pola distribusi yang lebih terpisah dan tidak terlalu kompleks.
 
-![image](https://github.com/user-attachments/assets/033e48af-2dda-47a0-bf8e-d45cdd2faa2a)
+![KDE](https://github.com/user-attachments/assets/7b102d56-64cb-4b21-b5d4-9dce80490a3c)
 
 ### Visualisasi Correlation Matrix
 Visualisasi matriks korelasi menunjukkan hubungan antar fitur numerik. Terlihat bahwa **HbA1c_level** dan **blood_glucose_level** memiliki korelasi yang cukup tinggi dengan variabel target **diabetes** (masing-masing 0,38 dan 0,39), menandakan bahwa kadar gula darah dan HbA1c sangat penting dalam prediksi diabetes. Selain itu, terdapat korelasi moderat antara **bmi** dan **age (0,38)**, yang mungkin menunjukkan bahwa berat badan cenderung meningkat seiring bertambahnya usia. Namun, variabel seperti **heart_disease** dan **hypertension** memiliki korelasi lebih rendah dengan diabetes, yang menunjukkan faktor-faktor ini mungkin kurang dominan dibandingkan faktor lain dalam menentukan kondisi diabetes.
 
-![image](https://github.com/user-attachments/assets/0e24cc03-2d00-4eef-b34b-099f5bf3a09c)
+![CorrelationMatrix](https://github.com/user-attachments/assets/4f1cc1bb-96b7-4351-9a0f-73d4addad75f)
 
 ## Data Preparation
 - **`Rare Category Handling`** <br>
