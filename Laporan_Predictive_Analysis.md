@@ -1,5 +1,7 @@
 # Laporan Proyek Machine Learning - Agistia Ronna Aniqa
 
+![image](https://github.com/user-attachments/assets/2dd4587d-9d5f-495a-8f6f-d8ab6f00482e)
+
 ## Domain Proyek
 
 Menurut **[Marlim et al (2022)](https://journal.ugm.ac.id/v3/JNTETI/article/view/3586)**, Diabetes merupakan penyakit metabolik kronis yang ditandai dengan peningkatan kadar glukosa darah yang lebih tinggi dari kadar normal, yang disebabkan oleh gangguan sekresi insulin atau gangguan efek biologis, atau keduanya. Penyakit ini dapat menyebabkan komplikasi serius di berbagai bagian tubuh dan secara keseluruhan meningkatkan risiko kematian dini. Beberapa komplikasi yang mungkin terjadi antara lain gagal ginjal, amputasi kaki, kehilangan penglihatan, serta kerusakan saraf. Selain itu, orang dewasa dengan diabetes memiliki risiko dua hingga tiga kali lipat lebih tinggi mengalami serangan jantung dan stroke. Pada masa kehamilan, diabetes yang tidak terkontrol dengan baik juga dapat meningkatkan risiko kematian janin dan komplikasi lainnya. Oleh karena itu, deteksi dini dan pengendalian penyakit diabetes sangat penting untuk mencegah dampak jangka panjang yang berbahaya.
