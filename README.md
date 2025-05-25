@@ -10,6 +10,7 @@ Proyek ini bertujuan untuk membangun model **machine learning** yang mampu mempr
 * 📝 **Laporan\_Predictive\_Analysis.md** → Laporan lengkap berisi ringkasan alur proyek dan hasil analisis.
 * 📊 **diabetes\_prediction\_dataset.csv** → Dataset utama yang digunakan dalam proyek.
 * 📦 **requirements.txt** → Daftar dependensi/libraries yang diperlukan untuk menjalankan proyek.
+* 🖼️ **assets** → Folder berisi gambar visualisasi yang digunakan di laporan proyek.
 
 ---
 
