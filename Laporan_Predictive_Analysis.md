@@ -189,7 +189,7 @@ Tahapan yang dilakukan pada proses pemodelan, sebagai berikut:
      ```python
      model_lightgbm.fit(X_train, y_train)
      ```
-3. **Evaluasi Model**: <br>
+3. **`Evaluasi Model`**: <br>
    Setelah pelatihan, performa ketiga model dibandingkan menggunakan metrik evaluasi seperti akurasi, precision, recall, dan F1-score untuk menentukan model terbaik.
 
 Berdasarkan hasil evaluasi awal, **LightGBM** dipilih sebagai model terbaik karena mampu memberikan hasil prediksi yang paling akurat dan seimbang dibandingkan dengan Random Forest dan XGBoost.
