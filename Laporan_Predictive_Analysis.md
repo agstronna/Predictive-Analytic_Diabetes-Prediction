@@ -27,7 +27,7 @@ Berdasarkan penelitian tersebut, penerapan machine learning dalam prediksi diabe
 2. Melakukan analisis terhadap hasil model berdasarkan metrik evaluasi, sehingga dapat dipilih model terbaik yang mampu memberikan prediksi dengan tingkat akurasi dan keandalan tertinggi.
 
 ## Data Understanding
-**`Diabetes Prediction Dataset`** merupakan kumpulan data medis dan demografi pasien beserta status diabetes mereka (positif atau negatif). Dataset ini mencakup fitur-fitur seperti usia, jenis kelamin, indeks massa tubuh (IMT/BMI), hipertensi, penyakit jantung, riwayat merokok, kadar HbA1c, dan kadar glukosa darah. Dataset ini terdiri dari 19 kolom dan 100.000 baris, serta sudah bersih tanpa missing values. Dataset diambil dari platform **[Kaggle](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset)**.
+**`Diabetes Prediction Dataset`** merupakan kumpulan data medis dan demografi pasien beserta status diabetes mereka (positif atau negatif). Dataset ini mencakup fitur-fitur seperti usia, jenis kelamin, indeks massa tubuh (BMI), hipertensi, penyakit jantung, riwayat merokok, kadar HbA1c, kadar glukosa darah, serta status diabetes. Dataset ini terdiri dari 9 kolom dan 100.000 baris, serta sudah bersih tanpa missing values. Dataset diambil dari platform **[Kaggle](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset)**.
 
 ### Variabel-variabel pada Diabetes Prediction Dataset adalah sebagai berikut:
 - **`gender`** : Jenis kelamin biologis seseorang, yang dapat memengaruhi kerentanan terhadap diabetes. Terdapat tiga kategori: laki-laki, perempuan, dan lainnya.
@@ -70,45 +70,9 @@ Visualisasi matriks korelasi menunjukkan hubungan antar fitur numerik. Terlihat 
   Pada fitur `gender`, terdapat kategori minoritas (misalnya kategori “other”) yang hanya muncul sebanyak 18 dari 100.000 baris. Oleh karena itu, kategori ini diganti dengan kategori mayoritas (male/female). Menggantikan kategori minoritas dengan modus membantu mengurangi noise dan ketidakseimbangan dalam fitur kategorikal, sehingga analisis dan pemodelan tidak terdistorsi oleh data yang terlalu jarang muncul. Hal ini memastikan model dapat belajar dari data yang lebih representatif.
   
      ```python
-    class RecommenderNet(tf.keras.Model):
-        def __init__(self, num_users, num_movies, embedding_size, **kwargs):
-            super(RecommenderNet, self).__init__(**kwargs)
-            self.num_users = num_users
-            self.num_movies = num_movies
-            self.embedding_size = embedding_size
-        
-        # Embedding untuk user
-        self.user_embedding = layers.Embedding(
-            num_users,
-            embedding_size,
-            embeddings_initializer='he_normal',
-            embeddings_regularizer=keras.regularizers.l2(1e-6)
-        )
-        self.user_bias = layers.Embedding(num_users, 1)
-        
-        # Embedding untuk movie
-        self.movie_embedding = layers.Embedding(
-            num_movies,
-            embedding_size,
-            embeddings_initializer='he_normal',
-            embeddings_regularizer=keras.regularizers.l2(1e-6)
-        )
-        self.movie_bias = layers.Embedding(num_movies, 1)
+    gender_mode = df['gender'].mode()[0]
 
-    def call(self, inputs):
-        user_vector = self.user_embedding(inputs[:, 0])
-        user_bias = self.user_bias(inputs[:, 0])
-        movie_vector = self.movie_embedding(inputs[:, 1])
-        movie_bias = self.movie_bias(inputs[:, 1])
-        
-        # Dot product antara user dan movie embedding
-        dot_user_movie = tf.reduce_sum(user_vector * movie_vector, axis=1, keepdims=True)
-        
-        # Menambahkan bias
-        x = dot_user_movie + user_bias + movie_bias
-        
-        # Aktivasi sigmoid untuk output antara 0 dan 1
-        return tf.nn.sigmoid(x)
+     df['gender'] = df['gender'].replace('Other', gender_mode)
      ```
 - **`Handling Outlier`** <br>
   Outlier dicari pada kolom numerik menggunakan metode IQR (Interquartile Range). Setelah outlier terdeteksi, dilakukan clipping pada nilai yang berada di luar batas bawah dan atas yang ditentukan. Penanganan outlier penting karena nilai ekstrem dapat memengaruhi proses pelatihan model secara berlebihan. Dengan menerapkan clipping, data menjadi lebih bersih dan representatif, sehingga model dapat belajar pola secara optimal.
@@ -155,42 +119,60 @@ Visualisasi matriks korelasi menunjukkan hubungan antar fitur numerik. Terlihat 
     ```
 
 ## Modeling
-Pada studi ini, model yang digunakan yaitu **Random Forest**, **XGBoost**, dan **LightGBM** untuk memprediksi kemungkinan seseorang mengidap diabetes berdasarkan fitur-fitur kesehatan yang tersedia. Pemilihan ketiga model ini didasarkan pada pertimbangan berikut:
-- **Random Forest**: Model ini merupakan metode ensemble yang menggabungkan banyak decision tree, dikenal mampu menangani data non-linear dan relatif tahan terhadap overfitting. Namun, model ini cenderung memiliki waktu pelatihan yang lebih lama dibandingkan metode boosting.
-- **XGBoost**: Model boosting dengan optimasi regularisasi yang membantu mencegah overfitting. XGBoost terkenal sangat efektif pada data tabular dan sering memberikan performa yang tinggi, meskipun waktu pelatihannya biasanya lebih lama dibandingkan LightGBM.
-- **LightGBM**: Model boosting yang dirancang untuk kecepatan dan efisiensi, sangat cocok digunakan pada dataset berukuran besar. Namun, model ini cenderung lebih sensitif terhadap outlier dibandingkan Random Forest dan XGBoost.
+Pada studi ini digunakan tiga algoritma untuk memprediksi kemungkinan seseorang mengidap diabetes berdasarkan fitur-fitur kesehatan yang tersedia, yaitu **Random Forest**, **XGBoost**, dan **LightGBM**. Pemilihan ketiga model ini mempertimbangkan kekuatan mereka pada data tabular, serta kemampuan mereka menangani masalah klasifikasi yang kompleks.
 
-Tahapan yang dilakukan pada proses pemodelan, sebagai berikut:
-1. **`Load Model`**:
+### **Random Forest**
 
-   - **Random Forest** diload dengan parameter `n_estimators=100` dan `random_state=123`:
-     ```python
-     model_randomforest = RandomForestClassifier(n_estimators=100, random_state=123)
-     ```
-   - **XGBoost** diload dengan parameter `use_label_encoder=False`, `eval_metric='logloss'`, dan `random_state=123`:
-     ```python
-     model_xgboost = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=123)
-     ```
-   - **LightGBM** diload dengan parameter `random_state=123`:
-     ```python
-     model_lightgbm = LGBMClassifier(random_state=123)
-     ```
-2. **`Pelatihan Model`**: <br>
-   Masing-masing model dilatih menggunakan data latih `X_train dan y_train`:
-   - **Random Forest** 
-     ```python
-     model_randomforest.fit(X_train, y_train)
-     ```
-   - **XGBoost** 
-     ```python
-     model_xgboost.fit(X_train, y_train)
-     ```
-   - **LightGBM** 
-     ```python
-     model_lightgbm.fit(X_train, y_train)
-     ```
-3. **`Evaluasi Model`**: <br>
-   Setelah pelatihan, performa ketiga model dibandingkan menggunakan metrik evaluasi seperti akurasi, precision, recall, dan F1-score untuk menentukan model terbaik.
+Random Forest adalah algoritma ensemble berbasis decision tree. Cara kerjanya:
+
+* Membuat banyak decision tree dari **berbagai subset data acak (bootstrapping)**.
+* Pada setiap split, hanya mempertimbangkan subset acak dari fitur (feature bagging).
+* Untuk prediksi klasifikasi, hasil akhirnya didapat dengan **voting mayoritas** dari semua pohon (untuk regresi: rata-rata prediksi).
+
+Kelebihan: tahan terhadap overfitting, mampu menangani data non-linear, robust terhadap outlier.
+
+```python
+model_randomforest = RandomForestClassifier(n_estimators=100, random_state=123)
+model_randomforest.fit(X_train, y_train)
+```
+
+### **XGBoost**
+
+XGBoost (Extreme Gradient Boosting) adalah algoritma boosting berbasis pohon keputusan dengan tambahan optimasi.
+Cara kerjanya:
+
+* **Membangun model secara sekuensial**, di mana setiap pohon baru dilatih untuk memperbaiki kesalahan (residual) dari pohon sebelumnya.
+* Menggunakan teknik **gradient descent** untuk meminimalkan fungsi loss.
+* Dilengkapi regularisasi (L1, L2) untuk mengurangi overfitting.
+
+Kelebihan: performa tinggi pada data tabular, efektif untuk menangani kompleksitas pola, sering digunakan di kompetisi data science.
+
+```python
+model_xgboost = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=123)
+model_xgboost.fit(X_train, y_train)
+```
+
+### **LightGBM**
+
+LightGBM adalah algoritma boosting mirip XGBoost, tetapi lebih dioptimalkan untuk efisiensi.
+Cara kerjanya:
+
+* **Gradient boosting**, seperti XGBoost, tetapi dengan teknik khusus:
+
+  * **Leaf-wise tree growth** (lebih fokus memperdalam cabang dengan loss terbesar).
+  * **Histogram-based splitting** untuk mempercepat proses.
+* Cocok untuk dataset besar, tetapi lebih sensitif terhadap outlier.
+
+Kelebihan: lebih cepat dan lebih hemat memori dibandingkan XGBoost, cocok untuk eksperimen skala besar.
+
+```python
+model_lightgbm = LGBMClassifier(random_state=123)
+model_lightgbm.fit(X_train, y_train)
+```
+
+### Evaluasi Model
+
+Setelah pelatihan, performa ketiga model dibandingkan menggunakan metrik evaluasi seperti akurasi, precision, recall, dan F1-score untuk menentukan model terbaik.
 
 Berdasarkan hasil evaluasi awal, **LightGBM** dipilih sebagai model terbaik karena mampu memberikan hasil prediksi yang paling akurat dan seimbang dibandingkan dengan Random Forest dan XGBoost.
 
@@ -241,18 +223,19 @@ Berikut merupakan ringkasan hasil evaluasi berdasarkan prediksi pada data:
 
     | Model          | Accuracy |  Precision |  Recall |  F1-Score |
     |----------------|---------------|--------------------|-----------------|-------------------|
-    | Random Forest  | 0.9683        | 0.97              | 0.97           | 0.97             |
-    | XGBoost        | 0.9701        | 0.97              | 0.97           | 0.97             |
-    | LightGBM       | 0.9705        | 0.97              | 0.97           | 0.97             |
+    | Random Forest  | 0.9683        | 0.97              | 0.68           | 0.80             |
+    | XGBoost        | 0.9698        | 0.95              | 0.68           | 0.79             |
+    | LightGBM       | 0.9705        | 0.97              | 0.67           | 0.79             |
 
     Analisis Hasil:
     - Ketiga model menunjukkan tingkat akurasi yang sangat tinggi (sekitar 97%), mengindikasikan kemampuan prediksi yang sangat baik pada data uji.
       
-    - Precision yang tinggi (~0.96–0.97) menunjukkan bahwa model jarang salah mengklasifikasikan kasus negatif sebagai positif (False Positive).
+    - Precision yang tinggi (~0.95–0.97) menunjukkan bahwa model jarang salah mengklasifikasikan kasus negatif sebagai positif (False Positive).
+    
       
     - Recall sedikit lebih rendah (~0.67–0.68), mengindikasikan masih adanya beberapa kasus positif yang tidak terdeteksi dengan baik (False Negative).
 
-    - F1-Score memperlihatkan keseimbangan antara Precision dan Recall, dengan hasil terbaik dicapai oleh XGBoost dan LightGBM (~0.80).
+    - F1-Score menunjukkan XGBoost dan LightGBM memiliki keseimbangan yang cukup baik antara precision dan recall.
 
     Berdasarkan evaluasi ini, meskipun **LightGBM** memiliki akurasi tertinggi **(0.9705)**, perbedaannya dengan **XGBoost** dan **Random Forest** sangat kecil. Mengingat keseimbangan Precision dan Recall, XGBoost dipilih sebagai solusi final karena memberikan kombinasi terbaik dalam mendeteksi kasus positif tanpa banyak kesalahan klasifikasi.
 
@@ -262,27 +245,27 @@ Berikut merupakan ringkasan hasil evaluasi berdasarkan prediksi pada data:
     | -----         |----------------     |---------------        |--------------------     |
     |Random Forest  | Actual Negatif (0)  | 27310             	  | 128                     |
     |Random Forest  | Actual Positif (1)  | 822               	  | 1740                    |
-    |XGBoost        | Actual Negatif (0)  | 27357             	  | 81                      |
-    |XGBoost        | Actual Positif (1)  | 815               	  | 1747                    |
+    |XGBoost        | Actual Negatif (0)  | 27344             	  | 94                      |
+    |XGBoost        | Actual Positif (1)  | 813               	  | 1749                    |
     |LightGBM       | Actual Negatif (0)  | 27389             	  | 49                      |
     |LightGBM       | Actual Positif (1)  | 835               	  | 1727                    |
 
     Analisis Confusion Matrix:
     - Ketiga model memiliki performa sangat baik dalam mengklasifikasikan kelas negatif (0), dengan jumlah **True Negative (TN)** yang tinggi dan **False Positive (FP)** yang sangat rendah, menunjukkan bahwa model jarang salah mengklasifikasikan kasus negatif sebagai positif.
     
-    - Perbedaan muncul dalam menangani kelas positif (1), di mana **LightGBM memiliki jumlah False Negative (FN) tertinggi (835)**, artinya lebih banyak kasus positif yang tidak terdeteksi dibandingkan XGBoost (815) dan Random Forest (822).
+    - Perbedaan muncul dalam menangani kelas positif (1), di mana **LightGBM memiliki jumlah False Negative (FN) tertinggi (835)**, artinya lebih banyak kasus positif yang tidak terdeteksi dibandingkan XGBoost (813) dan Random Forest (822).
     
     - **XGBoost menunjukkan keseimbangan terbaik** dengan False Negative yang lebih rendah dibandingkan LightGBM, dan False Positive yang lebih rendah dibandingkan Random Forest, menjadikannya model yang paling optimal untuk mendeteksi kasus positif secara akurat.
 
 ## Conclusion
 
-Pada proyek ini, telah dilakukan pengembangan model machine learning untuk memprediksi kemungkinan seseorang mengidap diabetes berdasarkan berbagai faktor kesehatan, seperti usia, jenis kelamin, BMI, hipertensi, penyakit jantung, riwayat merokok, kadar HbA1c, dan kadar glukosa darah.
+Pada proyek ini, telah dikembangkan model machine learning untuk memprediksi kemungkinan seseorang mengidap diabetes berdasarkan berbagai faktor kesehatan, seperti usia, jenis kelamin, BMI, hipertensi, penyakit jantung, riwayat merokok, kadar HbA1c, dan kadar glukosa darah.
 
-Beberapa algoritma yang digunakan, yaitu **Random Forest**, **XGBoost**, dan **LightGBM**, telah dibandingkan performanya menggunakan metrik evaluasi seperti accuracy, precision, recall, F1-score, dan confusion matrix. Hasil evaluasi menunjukkan bahwa ketiga model memiliki performa yang sangat baik, dengan tingkat akurasi mencapai sekitar 97%.
+Tiga algoritma utama yang digunakan adalah **Random Forest**, **XGBoost**, dan **LightGBM**. Evaluasi dilakukan menggunakan metrik seperti **accuracy**, **precision**, **recall**, **F1-score**, dan **confusion matrix**. Ketiga model menunjukkan performa yang sangat baik, dengan tingkat akurasi sekitar **96.8%–97.0%**.
 
-Meskipun **LightGBM** memiliki akurasi tertinggi, **XGBoost** dipilih sebagai model final karena menunjukkan keseimbangan terbaik antara precision dan recall, sehingga mampu mendeteksi kasus positif (diabetes) dengan lebih baik tanpa mengorbankan jumlah kesalahan klasifikasi negatif.
+Meskipun **LightGBM** mencatatkan akurasi tertinggi (**0.9705**), evaluasi lebih lanjut menunjukkan bahwa **XGBoost** memiliki keseimbangan terbaik antara **precision (0.95)** dan **recall (0.68)**. Dengan jumlah **False Negative (813)** yang lebih rendah dibanding LightGBM (835), dan **False Positive (94)** yang masih tergolong rendah, XGBoost dinilai paling optimal dalam mendeteksi kasus positif secara akurat, tanpa mengorbankan banyak kesalahan klasifikasi negatif.
 
-Kesimpulannya, penggunaan machine learning terbukti menjadi solusi potensial untuk meningkatkan efisiensi deteksi dini diabetes, membantu tenaga medis dalam pengambilan keputusan klinis, serta meningkatkan kesadaran masyarakat terkait pentingnya faktor risiko. Dengan implementasi yang baik, model prediksi diabetes dapat membawa manfaat besar, tidak hanya bagi individu, tetapi juga bagi sistem kesehatan secara keseluruhan, dengan mendorong pencegahan dan penanganan penyakit yang lebih cepat dan tepat.
+Kesimpulannya, penggunaan machine learning, khususnya dengan model **XGBoost**, terbukti efektif dalam meningkatkan efisiensi deteksi dini diabetes. Model ini berpotensi membantu tenaga medis dalam pengambilan keputusan klinis, sekaligus meningkatkan kesadaran masyarakat terhadap faktor risiko yang memicu penyakit. Dengan implementasi yang tepat, sistem prediksi ini dapat memberikan dampak positif tidak hanya bagi individu, tetapi juga bagi sistem kesehatan secara keseluruhan, melalui deteksi dan intervensi yang lebih cepat dan tepat.
 
 ## References
 
