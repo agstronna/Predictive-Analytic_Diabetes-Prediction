@@ -223,9 +223,9 @@ Berikut merupakan ringkasan hasil evaluasi berdasarkan prediksi pada data:
 
     | Model          | Accuracy |  Precision |  Recall |  F1-Score |
     |----------------|---------------|--------------------|-----------------|-------------------|
-    | Random Forest  | 0.9683        | 0.97              | 0.68           | 0.80             |
+    | Random Forest  | 0.9683        | 0.97              | 0.68           | 0.79             |
     | XGBoost        | 0.9698        | 0.95              | 0.68           | 0.79             |
-    | LightGBM       | 0.9705        | 0.97              | 0.67           | 0.79             |
+    | LightGBM       | 0.9705        | 0.97              | 0.67           | 0.80             |
 
     Analisis Hasil:
     - Ketiga model menunjukkan tingkat akurasi yang sangat tinggi (sekitar 97%), mengindikasikan kemampuan prediksi yang sangat baik pada data uji.
