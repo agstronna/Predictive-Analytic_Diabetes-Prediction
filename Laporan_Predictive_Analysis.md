@@ -71,8 +71,7 @@ Visualisasi matriks korelasi menunjukkan hubungan antar fitur numerik. Terlihat 
   
      ```python
     gender_mode = df['gender'].mode()[0]
-
-     df['gender'] = df['gender'].replace('Other', gender_mode)
+    df['gender'] = df['gender'].replace('Other', gender_mode)
      ```
 - **`Handling Outlier`** <br>
   Outlier dicari pada kolom numerik menggunakan metode IQR (Interquartile Range). Setelah outlier terdeteksi, dilakukan clipping pada nilai yang berada di luar batas bawah dan atas yang ditentukan. Penanganan outlier penting karena nilai ekstrem dapat memengaruhi proses pelatihan model secara berlebihan. Dengan menerapkan clipping, data menjadi lebih bersih dan representatif, sehingga model dapat belajar pola secara optimal.
