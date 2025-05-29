@@ -109,8 +109,8 @@ Visualisasi matriks korelasi menunjukkan hubungan antar fitur numerik. Terlihat 
     df[numerical_features] = scaler.fit_transform(df[numerical_features])
     ```
 - **`Train-Test-Split`** <br>
-  Dataset dibagi menjadi 80% data training dan 20% data testing, dengan diabetes sebagai variabel target yang akan diprediksi. Pemisahan ini penting untuk mengevaluasi kinerja model pada data yang belum pernah dilihat sebelumnya, membantu mengukur kemampuan generalisasi model, dan mencegah overfitting.
-
+  Dataset dibagi menjadi 70% data pelatihan (training) dan 30% data pengujian (testing), dengan variabel target berupa kolom `diabetes`. Pemisahan data ini dilakukan menggunakan fungsi `train_test_split` dari pustaka Scikit-learn dengan parameter `test_size=0.3` dan `random_state=123`. Tujuan dari pemisahan ini adalah untuk mengevaluasi kinerja model pada data yang belum pernah dilihat sebelumnya, sehingga dapat mengukur kemampuan generalisasi model secara lebih akurat dan juga membantu mencegah overfitting.
+  
     ```python
     X = df.drop(columns=["diabetes"])  
     y = df["diabetes"]
@@ -118,64 +118,99 @@ Visualisasi matriks korelasi menunjukkan hubungan antar fitur numerik. Terlihat 
     ```
 
 ## Modeling
-Pada studi ini digunakan tiga algoritma untuk memprediksi kemungkinan seseorang mengidap diabetes berdasarkan fitur-fitur kesehatan yang tersedia, yaitu **Random Forest**, **XGBoost**, dan **LightGBM**. Pemilihan ketiga model ini mempertimbangkan kekuatan mereka pada data tabular, serta kemampuan mereka menangani masalah klasifikasi yang kompleks.
+
+Dalam studi ini digunakan tiga algoritma machine learning untuk memprediksi kemungkinan seseorang mengidap diabetes berdasarkan fitur-fitur kesehatan yang tersedia, yaitu **Random Forest**, **XGBoost**, dan **LightGBM**. Pemilihan ketiga model ini mempertimbangkan kekuatan mereka dalam menangani data tabular serta kemampuan mereka untuk memproses masalah klasifikasi yang kompleks.
 
 ### **Random Forest**
 
-Random Forest adalah algoritma ensemble berbasis decision tree. Cara kerjanya:
+Random Forest adalah algoritma ensemble berbasis decision tree yang bekerja dengan cara:
 
-* Membuat banyak decision tree dari **berbagai subset data acak (bootstrapping)**.
-* Pada setiap split, hanya mempertimbangkan subset acak dari fitur (feature bagging).
-* Untuk prediksi klasifikasi, hasil akhirnya didapat dengan **voting mayoritas** dari semua pohon (untuk regresi: rata-rata prediksi).
+* Membuat banyak pohon keputusan (**decision trees**) dari subset data yang dipilih secara acak (**bootstrapping**).
+* Pada setiap split di pohon, hanya sebagian subset fitur yang dipertimbangkan (**feature bagging**) untuk meningkatkan variasi antar pohon.
+* Untuk klasifikasi, hasil akhirnya diperoleh melalui **voting mayoritas** dari semua pohon.
 
-Kelebihan: tahan terhadap overfitting, mampu menangani data non-linear, robust terhadap outlier.
+**Parameter yang digunakan**:
 
-```python
-model_randomforest = RandomForestClassifier(n_estimators=100, random_state=123)
-model_randomforest.fit(X_train, y_train)
-```
+* `n_estimators = 100` → jumlah pohon dalam hutan. Dipilih karena berdasarkan literatur umum, nilai ini sering memberikan keseimbangan yang baik antara performa model dan waktu komputasi, tanpa menyebabkan overfitting atau underfitting.
+* `random_state = 123` → digunakan agar hasil eksperimen dapat direproduksi dengan konsisten, sehingga evaluasi model bisa dilakukan secara adil dan transparan.
+
+**Kelebihan**: tahan terhadap overfitting, mampu menangani data non-linear, dan robust terhadap outlier.
 
 ### **XGBoost**
 
-XGBoost (Extreme Gradient Boosting) adalah algoritma boosting berbasis pohon keputusan dengan tambahan optimasi.
-Cara kerjanya:
+XGBoost (Extreme Gradient Boosting) adalah algoritma boosting berbasis decision tree yang dilengkapi dengan berbagai optimasi dan regularisasi. Cara kerjanya:
 
-* **Membangun model secara sekuensial**, di mana setiap pohon baru dilatih untuk memperbaiki kesalahan (residual) dari pohon sebelumnya.
+* Membangun model secara bertahap (**sekuensial**), di mana setiap pohon baru fokus memperbaiki kesalahan (residual) dari pohon sebelumnya.
 * Menggunakan teknik **gradient descent** untuk meminimalkan fungsi loss.
-* Dilengkapi regularisasi (L1, L2) untuk mengurangi overfitting.
+* Memasukkan regularisasi (L1, L2) untuk membantu mengurangi overfitting.
 
-Kelebihan: performa tinggi pada data tabular, efektif untuk menangani kompleksitas pola, sering digunakan di kompetisi data science.
+**Parameter yang digunakan**:
 
-```python
-model_xgboost = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=123)
-model_xgboost.fit(X_train, y_train)
-```
+* `use_label_encoder = False` → mematikan encoder label bawaan untuk menghindari warning selama pelatihan, karena pada versi terbaru XGBoost parameter ini tidak diperlukan.
+* `eval_metric = 'logloss'` → metrik evaluasi yang digunakan selama pelatihan, dipilih karena sesuai untuk tugas klasifikasi biner seperti prediksi diabetes.
+* `random_state = 123` → digunakan untuk menjaga konsistensi hasil eksperimen.
+
+**Kelebihan**: performa tinggi di data tabular, efektif dalam menangkap pola kompleks, dan sering menjadi andalan di kompetisi data science.
 
 ### **LightGBM**
 
-LightGBM adalah algoritma boosting mirip XGBoost, tetapi lebih dioptimalkan untuk efisiensi.
-Cara kerjanya:
+LightGBM adalah algoritma boosting mirip XGBoost, tetapi dirancang lebih efisien dalam komputasi.
 
-* **Gradient boosting**, seperti XGBoost, tetapi dengan teknik khusus:
+* Menerapkan **gradient boosting**, tetapi dengan pendekatan:
 
-  * **Leaf-wise tree growth** (lebih fokus memperdalam cabang dengan loss terbesar).
-  * **Histogram-based splitting** untuk mempercepat proses.
-* Cocok untuk dataset besar, tetapi lebih sensitif terhadap outlier.
+  * **Leaf-wise tree growth**, yaitu memperluas cabang dengan loss terbesar terlebih dahulu (bukan memperluas secara seimbang seperti level-wise).
+  * **Histogram-based splitting**, yang mempercepat proses pemisahan dan mengurangi konsumsi memori.
+* Sangat cocok untuk dataset berukuran besar, meskipun lebih sensitif terhadap outlier.
 
-Kelebihan: lebih cepat dan lebih hemat memori dibandingkan XGBoost, cocok untuk eksperimen skala besar.
+**Parameter yang digunakan**:
 
-```python
-model_lightgbm = LGBMClassifier(random_state=123)
-model_lightgbm.fit(X_train, y_train)
-```
+* `random_state = 123` → untuk memastikan hasil eksperimen dapat direproduksi, sehingga memudahkan evaluasi performa antar model.
 
-### Evaluasi Model
+**Kelebihan**: lebih cepat dan hemat memori dibandingkan XGBoost, cocok untuk eksperimen dalam skala besar.
 
-Setelah pelatihan, performa ketiga model dibandingkan menggunakan metrik evaluasi seperti akurasi, precision, recall, dan F1-score untuk menentukan model terbaik.
+---
 
-Berdasarkan hasil evaluasi awal, **LightGBM** dipilih sebagai model terbaik karena mampu memberikan hasil prediksi yang paling akurat dan seimbang dibandingkan dengan Random Forest dan XGBoost.
+### **Tahapan Pemodelan**
+
+1. **Load Model**
+   Berikut adalah inisialisasi model dengan parameter masing-masing:
+
+   - **Random Forest** diload dengan parameter `n_estimators=100` dan `random_state=123`:
+     ```python
+     model_randomforest = RandomForestClassifier(n_estimators=100, random_state=123)
+     ```
+   - **XGBoost** diload dengan parameter `use_label_encoder=False`, `eval_metric='logloss'`, dan `random_state=123`:
+     ```python
+     model_xgboost = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=123)
+     ```
+   - **LightGBM** diload dengan parameter `random_state=123`:
+     ```python
+     model_lightgbm = LGBMClassifier(random_state=123)
+     ```
+
+2. **Pelatihan Model**
+   Setiap model dilatih menggunakan data latih (`X_train` dan `y_train`):
+
+   - **Random Forest** dilatih dengan data latih yaitu `X_train dan y_train`:
+     ```python
+     model_randomforest.fit(X_train, y_train)
+     ```
+   - **XGBoost** dilatih dengan data latih yaitu `X_train dan y_train`:
+     ```python
+     model_xgboost.fit(X_train, y_train)
+     ```
+   - **LightGBM** dilatih dengan data latih yaitu `X_train dan y_train`:
+     ```python
+     model_lightgbm.fit(X_train, y_train)
+     ```
+
+3. **Evaluasi Model**
+   Setelah pelatihan, performa ketiga model dibandingkan menggunakan metrik evaluasi seperti **akurasi**, **precision**, **recall**, dan **F1-score**. Tujuan evaluasi ini adalah untuk menentukan model mana yang memberikan keseimbangan terbaik antara sensitivitas dan spesifisitas prediksi.
+
+Berdasarkan hasil evaluasi awal, **LightGBM** dipilih sebagai model terbaik karena memberikan hasil prediksi yang paling akurat dan seimbang dibandingkan Random Forest dan XGBoost.
 
 ## Evaluation
+
 **Evaluasi model** dilakukan menggunakan beberapa metrik utama yang sesuai dengan konteks klasifikasi biner, yaitu **Accuracy**, **Precision**, **Recall**, **F1-Score**, dan **Confusion Matrix**. Metrik-metrik ini dipilih karena pada kasus prediksi diabetes, keseimbangan antara deteksi kasus positif dan negatif sangat penting untuk memastikan hasil yang akurat dan dapat diandalkan.
 
 Metrik Evaluasi yang Digunakan
